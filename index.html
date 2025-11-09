@@ -3,295 +3,1045 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LuminaCut AI – Offline Film Editor</title>
+    <title>LuminaCut AI - Professional Video Editor</title>
     <style>
-        /* Dark theme inspired by the LuminaCut AI interface. */
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-                Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-            background-color: #0d1217;
-            color: #eef2f7;
+            box-sizing: border-box;
         }
 
-        h1 {
-            margin-top: 1.5rem;
-            font-size: 2rem;
-            text-align: center;
-            color: #ffffff;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+            color: #e8eaed;
+            overflow-x: hidden;
         }
 
-        p.tagline {
-            text-align: center;
-            color: #9aa6b3;
-            margin-bottom: 2rem;
-        }
-
-        .container {
+        /* Header */
+        .header {
+            background: rgba(20, 25, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
             display: flex;
-            gap: 1.5rem;
-            padding: 0 2rem 2rem;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .section {
-            background-color: #161d29;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            height: calc(100vh - 73px);
+            gap: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(20, 25, 40, 0.8);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+
+        .project-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateX(4px);
+        }
+
+        .project-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border-color: #667eea;
+        }
+
+        /* Center - Video Preview & Timeline */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            background: rgba(10, 14, 26, 0.5);
+            overflow: hidden;
+        }
+
+        .video-preview-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+            min-height: 400px;
+        }
+
+        #video-preview {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
+
+        .upload-placeholder {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .upload-placeholder h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #9ca3af;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(102, 126, 234, 0.5);
+            border-radius: 12px;
+            padding: 3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .file-list {
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item-name {
+            font-size: 0.9rem;
+            color: #e8eaed;
+        }
+
+        .file-item-size {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        /* Timeline */
+        .timeline {
+            background: rgba(20, 25, 40, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            height: 150px;
+            overflow-x: auto;
+        }
+
+        .timeline-track {
+            background: rgba(0, 0, 0, 0.3);
+            height: 60px;
+            border-radius: 6px;
+            position: relative;
+            margin-top: 0.5rem;
+        }
+
+        /* Right Panel - Editing Tools */
+        .right-panel {
+            background: rgba(20, 25, 40, 0.8);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .tool-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 1rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            flex: 1 1 400px;
-        3min-width: 350px;
-        }
-
-        .section h2 {
-            margin-top: 0;
             margin-bottom: 1rem;
-            font-size: 1.2rem;
-            color: #c7d4e1;
         }
 
-        label {
+        .tool-section h3 {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
             display: block;
-            margin-bottom: 0.25rem;
             font-size: 0.85rem;
-            color: #a7b4c2;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
         }
 
         input[type="text"],
-        input[type="file"],
-        textarea {
+        input[type="number"],
+        input[type="password"],
+        textarea,
+        select {
             width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 0.75rem;
-            background-color: #0e1621;
-            border: 1px solid #233041;
-            border-radius: 4px;
-            color: #ffffff;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #e8eaed;
             font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
-        input[type="file"] {
-            color: #ffffff;
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(0, 0, 0, 0.4);
         }
 
         textarea {
             resize: vertical;
             min-height: 80px;
+            font-family: inherit;
         }
 
-        .button {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            margin-right: 0.5rem;
-            margin-top: 0.5rem;
-            background-color: #355070;
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 4px;
-            color: #ffffff;
-            font-size: 0.85rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.15s ease-in-out;
-        }
-
-        .button:hover {
-            background-color: #446385;
-        }
-
-        .checkbox-group {
-            display: flex;
+            transition: all 0.2s;
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            justify-content: center;
         }
 
-        .checkbox-group input {
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e8eaed;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Editing Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tool-btn {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #e8eaed;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .tool-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            background: rgba(20, 25, 40, 0.95);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            border-color: #10b981;
+        }
+
+        .notification.error {
+            border-color: #ef4444;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .sidebar, .right-panel {
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        /* Icons (using Unicode) */
+        .icon::before {
             margin-right: 0.5rem;
         }
 
-        video {
-            width: 100%;
-            height: 200px;
-            background-color: #000000;
-            border-radius: 4px;
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <h1>LuminaCut AI</h1>
-    <p class="tagline">
-        Edit videos with natural language instructions in a fully offline‑friendly stack.
-    </p>
-
-    <div class="container">
-        <!-- New Project panel -->
-        <div class="section">
-            <h2>New Project</h2>
-            <label for="project-name">Project name</label>
-            <input id="project-name" type="text" placeholder="Untitled Project" />
-
-            <label for="video-file">Video file</label>
-            <input id="video-file" type="file" accept="video/*" />
-
-            <button class="button" type="button">Upload</button>
-        </div>
-
-        <!-- Projects list panel -->
-        <div class="section">
-            <h2>Projects</h2>
-            <p>No projects yet.</p>
-        </div>
-
-                <!-- OpenAI API Configuration panel -->
-                <div class="section">
-                                <h2>OpenAI Configuration</h2>
-                                <label for="openai-key">OpenAI API Key</label>
-                                <input id="openai-key" type="password" placeholder="sk-..." />
-                                <button class="button" type="button" id="save-api-key">Save API Key</button>
-                            </div>
-
-        <!-- Editor panel -->
-        <div class="section">
-            <h2>Editor</h2>
-            <video id="preview" controls>
-             
-                Your browser does not support the video tag.
-            </video>
-    
-            
-                <script>
-      const fileInput = document.getElementById('video-file');
-      const previewVideo = document.getElementById('preview');
-      let currentSrc = null;
-      fileInput.addEventListener('change', function(event) {
-        const file = fileInput.files[0];
-        if (file) {
-          if (currentSrc) {
-            URL.revokeObjectURL(currentSrc);
-          }
-          const url = URL.createObjectURL(file);
-          currentSrc = url;
-          previewVideo.src = url;
-          previewVideo.style.display = 'block';
-          previewVideo.play();
-        }
-      });
-
-                            // OpenAI API Key Management
-                            const saveApiKeyBtn = document.getElementById('save-api-key');
-                            const apiKeyInput = document.getElementById('openai-key');
-                            const applyInstructionBtn = document.querySelector('button[type="button"]:not(#save-api-key)');
-
-                            // Load saved API key on page load
-                            const savedKey = localStorage.getItem('openai-api-key');
-                            if (savedKey) {
-                                            apiKeyInput.value = savedKey;
-                                        }
-
-                            // Save API key to localStorage
-                            saveApiKeyBtn.addEventListener('click', function() {
-                                            const apiKey = apiKeyInput.value.trim();
-                                            if (apiKey) {
-                                                                localStorage.setItem('openai-api-key', apiKey);
-                                                                alert('API key saved successfully!');
-                                                            } else {
-                                                                alert('Please enter a valid API key.');
-                                                            }
-                                        });
-
-                            // Handle Apply Instruction button
-                            const instructionTextarea = document.getElementById('instruction');
-                            const generatePreviewCheckbox = document.getElementById('generate-preview');
-
-                            // Find the Apply instruction button (last button element)
-                            const buttons = document.querySelectorAll('button.button');
-                            const applyBtn = buttons[buttons.length - 1];
-
-                            applyBtn.addEventListener('click', async function() {
-                                            const instruction = instructionTextarea.value.trim();
-                                            const apiKey = localStorage.getItem('openai-api-key');
-
-                                            if (!apiKey) {
-                                                                alert('Please configure your OpenAI API key first.');
-                                                                return;
-                                                            }
-
-                                            if (!instruction) {
-                                                                alert('Please enter an editing instruction.');
-                                                                return;
-                                                            }
-
-                                            try {
-                                                                // Show processing message
-                                                                applyBtn.textContent = 'Processing...';
-                                                                applyBtn.disabled = true;
-
-                                                                // Call OpenAI API
-                                                                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                                                                                        method: 'POST',
-                                                                                        headers: {
-                                                                                                                    'Content-Type': 'application/json',
-                                                                                                                    'Authorization': `Bearer ${apiKey}`
-                                                                                                                                            },
-                                                                                        body: JSON.stringify({
-                                                                                                                    model: 'gpt-4o-mini',
-                                                                                                                    messages: [{
-                                                                                                                                                    role: 'system',
-                                                                                                                                                    content: 'You are a video editing assistant. Provide clear, technical instructions for video editing based on user requests.'
-                                                                                                                                                                                }, {
-                                                                                                                                                    role: 'user',
-                                                                                                                                                    content: instruction
-                                                                                                                                                                                }]
-                                                                                                                                            })
-                                                                                                            });
-
-                                                                if (!response.ok) {
-                                                                                        throw new Error(`API request failed: ${response.status}`);
-                                                                                    }
-
-                                                                const data = await response.json();
-                                                                const aiResponse = data.choices[0].message.content;
-
-                                                                // Display the AI response
-                                                                alert('AI Response:\n\n' + aiResponse);
-
-                                                                // If generate preview is checked, show a message
-                                                                if (generatePreviewCheckbox.checked) {
-                                                                                        console.log('Preview generation would happen here');
-                                                                                    }
-
-                                                            } catch (error) {
-                                                                console.error('Error:', error);
-                                                                alert('Error processing instruction: ' + error.message);
-                                                            } finally {
-                                                                // Reset button state
-                                                                applyBtn.textContent = 'Apply instruction';
-                                                                applyBtn.disabled = false;
-                                                            }
-                                        });
-    </script>
-<div>
-                
-                <button class="button" type="button">Export MP4</button>
-                <button class="button" type="button">Export MOV</button>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">🎬 LuminaCut AI</div>
+        <div class="header-actions">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Backend Ready</span>
             </div>
-            <label for="instruction">Instruction</label>
-            <textarea
-                id="instruction"
-                placeholder="Describe how to edit the video..."
-            ></textarea>
-            <div class="checkbox-group">
-                <input
-                    type="checkbox"
-                    id="generate-preview"
-                    checked
-                />
-                <label for="generate-preview"
-                    >Generate preview after applying instruction</label
-                >
-            </div>
-            <button class="button" type="button">Apply instruction</button>
+            <button class="btn btn-primary btn-small" id="new-project-btn">+ New Project</button>
         </div>
     </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Sidebar - Projects -->
+        <div class="sidebar">
+            <h2>📁 Projects</h2>
+            <div id="projects-list">
+                <p style="color: #9ca3af; font-size: 0.9rem; text-align: center; padding: 2rem 0;">
+                    No projects yet. Create one to get started!
+                </p>
+            </div>
+        </div>
+
+        <!-- Center - Video Preview & Timeline -->
+        <div class="center-panel">
+            <div class="video-preview-container">
+                <video id="video-preview" controls class="hidden"></video>
+                <div id="upload-placeholder" class="upload-placeholder">
+                    <h3>Upload Videos to Get Started</h3>
+                    <div class="upload-area" id="upload-area">
+                        <p style="font-size: 1.1rem; margin-bottom: 1rem;">📤 Drop videos here or click to browse</p>
+                        <p style="color: #9ca3af; font-size: 0.9rem;">Supports MP4, MOV, AVI, MKV, WebM (Multiple files allowed)</p>
+                        <input type="file" id="video-upload" accept="video/*" multiple style="display: none;">
+                    </div>
+                    <div id="file-list" class="file-list"></div>
+                </div>
+            </div>
+
+            <div class="timeline">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 0.9rem; color: #9ca3af;">Timeline</h3>
+                    <span style="font-size: 0.8rem; color: #6b7280;">00:00:00</span>
+                </div>
+                <div class="timeline-track" id="timeline-track">
+                    <div style="padding: 1rem; text-align: center; color: #6b7280; font-size: 0.85rem;">
+                        Upload a video to see timeline
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Editing Tools -->
+        <div class="right-panel">
+            <!-- AI Assistant -->
+            <div class="tool-section">
+                <h3>🤖 AI Assistant</h3>
+                <div class="form-group">
+                    <label>Tell AI what to do</label>
+                    <textarea id="ai-instruction" placeholder="e.g., 'Make the video 30 seconds long' or 'Add a grayscale filter' or 'Speed up by 2x'"></textarea>
+                </div>
+                <button class="btn btn-primary btn-block" id="apply-ai-btn">✨ Apply with AI</button>
+            </div>
+
+            <!-- Quick Tools -->
+            <div class="tool-section">
+                <h3>⚡ Quick Tools</h3>
+                <div class="tools-grid">
+                    <div class="tool-btn" data-action="trim">✂️ Trim</div>
+                    <div class="tool-btn" data-action="cut">🔪 Cut</div>
+                    <div class="tool-btn" data-action="speed">⚡ Speed</div>
+                    <div class="tool-btn" data-action="crop">🖼️ Crop</div>
+                    <div class="tool-btn" data-action="resize">📐 Resize</div>
+                    <div class="tool-btn" data-action="rotate">🔄 Rotate</div>
+                    <div class="tool-btn" data-action="text">📝 Text</div>
+                    <div class="tool-btn" data-action="audio">🔊 Audio</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="tool-section">
+                <h3>🎨 Filters</h3>
+                <div class="form-group">
+                    <label>Select Filter</label>
+                    <select id="filter-select">
+                        <option value="">None</option>
+                        <option value="grayscale">Grayscale</option>
+                        <option value="sepia">Sepia</option>
+                        <option value="brightness">Brightness</option>
+                        <option value="contrast">Contrast</option>
+                        <option value="saturation">Saturation</option>
+                        <option value="blur">Blur</option>
+                        <option value="sharpen">Sharpen</option>
+                        <option value="vignette">Vignette</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary btn-block" id="apply-filter-btn">Apply Filter</button>
+            </div>
+
+            <!-- Export -->
+            <div class="tool-section">
+                <h3>💾 Export</h3>
+                <div class="form-group">
+                    <label>Format</label>
+                    <select id="export-format">
+                        <option value="mp4">MP4</option>
+                        <option value="mov">MOV</option>
+                        <option value="webm">WebM</option>
+                        <option value="avi">AVI</option>
+                        <option value="mkv">MKV</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quality</label>
+                    <select id="export-quality">
+                        <option value="low">Low (Fast)</option>
+                        <option value="medium">Medium</option>
+                        <option value="high" selected>High</option>
+                        <option value="ultra">Ultra (Slow)</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-success btn-block" id="export-btn">📥 Export Video</button>
+                    <button class="btn btn-secondary btn-block" id="preview-btn">👁️ Quick Preview</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:3000/api';
+
+        // State
+        let currentProject = null;
+        let uploadedFiles = [];
+        let currentVideoPath = null;
+
+        // Elements
+        const videoPreview = document.getElementById('video-preview');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        const uploadArea = document.getElementById('upload-area');
+        const videoUpload = document.getElementById('video-upload');
+        const fileList = document.getElementById('file-list');
+        const projectsList = document.getElementById('projects-list');
+        const aiInstruction = document.getElementById('ai-instruction');
+        const applyAiBtn = document.getElementById('apply-ai-btn');
+        const newProjectBtn = document.getElementById('new-project-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const previewBtn = document.getElementById('preview-btn');
+        const applyFilterBtn = document.getElementById('apply-filter-btn');
+        const filterSelect = document.getElementById('filter-select');
+
+        // Utility Functions
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div>${type === 'success' ? '✓' : '✗'}</div>
+                    <div>${message}</div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 4000);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        async function checkBackend() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        // Upload Handling
+        uploadArea.addEventListener('click', () => videoUpload.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('video/'));
+            await handleFileUpload(files);
+        });
+
+        videoUpload.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            await handleFileUpload(files);
+        });
+
+        async function handleFileUpload(files) {
+            if (files.length === 0) return;
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('video', file);
+
+                try {
+                    applyAiBtn.disabled = true;
+                    applyAiBtn.innerHTML = '<div class="spinner"></div> Uploading...';
+
+                    const response = await fetch(`${API_URL}/upload/video`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        uploadedFiles.push(data.file);
+                        updateFileList();
+
+                        // Show first video
+                        if (uploadedFiles.length === 1) {
+                            loadVideo(data.file.path);
+                        }
+
+                        showNotification(`${file.name} uploaded successfully!`);
+                    }
+                } catch (error) {
+                    showNotification(`Failed to upload ${file.name}`, 'error');
+                } finally {
+                    applyAiBtn.disabled = false;
+                    applyAiBtn.innerHTML = '✨ Apply with AI';
+                }
+            }
+        }
+
+        function updateFileList() {
+            if (uploadedFiles.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+
+            fileList.innerHTML = uploadedFiles.map((file, index) => `
+                <div class="file-item">
+                    <div>
+                        <div class="file-item-name">📹 ${file.originalName}</div>
+                        <div class="file-item-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button class="btn btn-secondary btn-small" onclick="loadVideo('${file.path}', ${index})">
+                        Preview
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function loadVideo(path, index = 0) {
+            currentVideoPath = path;
+            videoPreview.src = path;
+            videoPreview.classList.remove('hidden');
+            uploadPlaceholder.classList.add('hidden');
+            videoPreview.play();
+        }
+
+        // AI Instruction Processing
+        applyAiBtn.addEventListener('click', async () => {
+            const instruction = aiInstruction.value.trim();
+
+            if (!instruction) {
+                showNotification('Please enter an instruction', 'error');
+                return;
+            }
+
+            if (!currentVideoPath) {
+                showNotification('Please upload a video first', 'error');
+                return;
+            }
+
+            try {
+                applyAiBtn.disabled = true;
+                applyAiBtn.innerHTML = '<div class="spinner"></div> Processing...';
+
+                // Get video metadata first
+                const metaResponse = await fetch(`${API_URL}/video/metadata`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoPath: currentVideoPath })
+                });
+                const metaData = await metaResponse.json();
+
+                // Process with AI
+                const aiResponse = await fetch(`${API_URL}/ai/process-instruction`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instruction,
+                        videoMetadata: metaData.metadata
+                    })
+                });
+
+                const aiData = await aiResponse.json();
+
+                if (aiData.success) {
+                    showNotification('AI processed your request!');
+
+                    // Execute the editing action
+                    await executeEditAction(aiData.aiResponse);
+                }
+            } catch (error) {
+                showNotification('AI processing failed: ' + error.message, 'error');
+            } finally {
+                applyAiBtn.disabled = false;
+                applyAiBtn.innerHTML = '✨ Apply with AI';
+            }
+        });
+
+        async function executeEditAction(editData) {
+            const { action, parameters } = editData;
+
+            try {
+                let endpoint = '';
+                let body = { videoPath: currentVideoPath, ...parameters };
+
+                switch (action) {
+                    case 'trim':
+                        endpoint = '/video/trim';
+                        break;
+                    case 'cut':
+                        endpoint = '/video/cut';
+                        break;
+                    case 'speed':
+                        endpoint = '/video/speed';
+                        break;
+                    case 'filter':
+                        endpoint = '/video/filter';
+                        break;
+                    case 'audio':
+                        endpoint = '/video/audio';
+                        break;
+                    case 'text':
+                        endpoint = '/video/text';
+                        break;
+                    case 'crop':
+                        endpoint = '/video/crop';
+                        break;
+                    case 'resize':
+                        endpoint = '/video/resize';
+                        break;
+                    default:
+                        showNotification(`Action "${action}" will be implemented soon!`, 'error');
+                        return;
+                }
+
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadVideo(data.outputPath);
+                    showNotification(data.message);
+                }
+            } catch (error) {
+                showNotification('Edit action failed: ' + error.message, 'error');
+            }
+        }
+
+        // Filter Application
+        applyFilterBtn.addEventListener('click', async () => {
+            const filterType = filterSelect.value;
+
+            if (!filterType) {
+                showNotification('Please select a filter', 'error');
+                return;
+            }
+
+            if (!currentVideoPath) {
+                showNotification('Please upload a video first', 'error');
+                return;
+            }
+
+            try {
+                applyFilterBtn.disabled = true;
+                applyFilterBtn.innerHTML = '<div class="spinner"></div> Applying...';
+
+                const response = await fetch(`${API_URL}/video/filter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        videoPath: currentVideoPath,
+                        filterType,
+                        intensity: 1.0
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadVideo(data.outputPath);
+                    showNotification(data.message);
+                }
+            } catch (error) {
+                showNotification('Filter application failed: ' + error.message, 'error');
+            } finally {
+                applyFilterBtn.disabled = false;
+                applyFilterBtn.innerHTML = 'Apply Filter';
+            }
+        });
+
+        // Export
+        exportBtn.addEventListener('click', async () => {
+            if (!currentVideoPath) {
+                showNotification('Please upload a video first', 'error');
+                return;
+            }
+
+            const format = document.getElementById('export-format').value;
+            const quality = document.getElementById('export-quality').value;
+
+            try {
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<div class="spinner"></div> Exporting...';
+
+                const response = await fetch(`${API_URL}/export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        videoPath: currentVideoPath,
+                        format,
+                        quality,
+                        projectId: currentProject?.id
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Video exported as ${format.toUpperCase()}!`);
+
+                    // Download the file
+                    const link = document.createElement('a');
+                    link.href = data.exportPath;
+                    link.download = `export.${format}`;
+                    link.click();
+                }
+            } catch (error) {
+                showNotification('Export failed: ' + error.message, 'error');
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '📥 Export Video';
+            }
+        });
+
+        // Preview Generation
+        previewBtn.addEventListener('click', async () => {
+            if (!currentVideoPath) {
+                showNotification('Please upload a video first', 'error');
+                return;
+            }
+
+            try {
+                previewBtn.disabled = true;
+                previewBtn.innerHTML = '<div class="spinner"></div> Generating...';
+
+                const response = await fetch(`${API_URL}/export/preview`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoPath: currentVideoPath })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadVideo(data.previewPath);
+                    showNotification('Preview generated!');
+                }
+            } catch (error) {
+                showNotification('Preview generation failed: ' + error.message, 'error');
+            } finally {
+                previewBtn.disabled = false;
+                previewBtn.innerHTML = '👁️ Quick Preview';
+            }
+        });
+
+        // New Project
+        newProjectBtn.addEventListener('click', async () => {
+            const name = prompt('Enter project name:');
+            if (!name) return;
+
+            try {
+                const response = await fetch(`${API_URL}/projects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        videoPath: currentVideoPath
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentProject = data.project;
+                    showNotification('Project created!');
+                    loadProjects();
+                }
+            } catch (error) {
+                showNotification('Failed to create project', 'error');
+            }
+        });
+
+        // Load Projects
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_URL}/projects`);
+                const data = await response.json();
+
+                if (data.success && data.projects.length > 0) {
+                    projectsList.innerHTML = data.projects.map(project => `
+                        <div class="project-item ${currentProject?.id === project.id ? 'active' : ''}"
+                             onclick="selectProject('${project.id}')">
+                            <div style="font-weight: 600; margin-bottom: 0.25rem;">${project.name}</div>
+                            <div style="font-size: 0.8rem; color: #9ca3af;">
+                                ${new Date(project.created_at).toLocaleDateString()}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+            }
+        }
+
+        window.selectProject = async function(projectId) {
+            try {
+                const response = await fetch(`${API_URL}/projects/${projectId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentProject = data.project;
+                    if (currentProject.video_path) {
+                        loadVideo(currentProject.video_path);
+                    }
+                    loadProjects(); // Refresh to update active state
+                }
+            } catch (error) {
+                showNotification('Failed to load project', 'error');
+            }
+        };
+
+        // Tool buttons
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                showNotification(`${action} tool - Coming soon! Use AI assistant for now.`);
+            });
+        });
+
+        // Initialize
+        (async function init() {
+            const backendReady = await checkBackend();
+            if (!backendReady) {
+                showNotification('Backend not running. Start server with: npm start', 'error');
+            } else {
+                loadProjects();
+            }
+        })();
+    </script>
 </body>
-</html>   
+</html>

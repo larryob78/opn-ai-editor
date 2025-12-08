@@ -145,6 +145,21 @@
             font-size: 0.75rem;
             margin-left: 0.5rem;
         }
+
+        .duplicate-badge {
+            background-color: #8b5a2b;
+            color: #ffb84d;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            margin-left: 0.5rem;
+            font-weight: bold;
+        }
+
+        .media-item.duplicate {
+            border-color: #8b5a2b;
+            background-color: #2a1f15;
+        }
     </style>
 </head>
 <body>
@@ -175,6 +190,16 @@
         <!-- Media Library panel -->
         <div class="section">
             <h2>Media Library</h2>
+
+            <div id="duplicates-alert" style="display: none; background-color: #3d2a1a; border: 1px solid #8b5a2b; border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: #ffb84d; font-size: 1.2rem;">⚠️</span>
+                    <div>
+                        <strong style="color: #ffb84d;">Duplicates Found</strong>
+                        <p id="duplicates-count" style="margin: 0.25rem 0 0 0; color: #d4a574; font-size: 0.85rem;"></p>
+                    </div>
+                </div>
+            </div>
 
             <h3 style="color: #a7b4c2; font-size: 1rem; margin-top: 1rem; margin-bottom: 0.5rem;">Videos</h3>
             <div id="videos-list" style="margin-bottom: 1rem;">
@@ -219,6 +244,23 @@
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
       }
 
+      function findDuplicates(files) {
+        const duplicateMap = new Map();
+        const duplicates = new Set();
+
+        files.forEach((file, index) => {
+          const key = `${file.name}_${file.size}`;
+          if (duplicateMap.has(key)) {
+            duplicates.add(duplicateMap.get(key));
+            duplicates.add(index);
+          } else {
+            duplicateMap.set(key, index);
+          }
+        });
+
+        return duplicates;
+      }
+
       function addToMediaLibrary(file) {
         const fileInfo = {
           name: file.name,
@@ -242,29 +284,53 @@
       function updateMediaLibraryDisplay() {
         const videosList = document.getElementById('videos-list');
         const imagesList = document.getElementById('images-list');
+        const duplicatesAlert = document.getElementById('duplicates-alert');
+        const duplicatesCount = document.getElementById('duplicates-count');
+
+        // Find duplicates in all media
+        const allMedia = [...mediaLibrary.videos, ...mediaLibrary.images];
+        const videoDuplicates = findDuplicates(mediaLibrary.videos);
+        const imageDuplicates = findDuplicates(mediaLibrary.images);
+        const totalDuplicates = videoDuplicates.size + imageDuplicates.size;
+
+        // Show/hide duplicates alert
+        if (totalDuplicates > 0) {
+          duplicatesAlert.style.display = 'block';
+          duplicatesCount.textContent = `${totalDuplicates} duplicate file(s) detected`;
+        } else {
+          duplicatesAlert.style.display = 'none';
+        }
 
         // Update videos list
         if (mediaLibrary.videos.length === 0) {
           videosList.innerHTML = '<p style="color: #7a8694; font-size: 0.85rem;">No videos uploaded yet.</p>';
         } else {
-          videosList.innerHTML = mediaLibrary.videos.map(video => `
-            <div class="media-item">
+          videosList.innerHTML = mediaLibrary.videos.map((video, index) => {
+            const isDuplicate = videoDuplicates.has(index);
+            return `
+            <div class="media-item ${isDuplicate ? 'duplicate' : ''}">
               <span class="media-name">${video.name}</span>
+              ${isDuplicate ? '<span class="duplicate-badge">DUPLICATE</span>' : ''}
               <span class="media-size">${formatFileSize(video.size)}</span>
             </div>
-          `).join('');
+          `;
+          }).join('');
         }
 
         // Update images list
         if (mediaLibrary.images.length === 0) {
           imagesList.innerHTML = '<p style="color: #7a8694; font-size: 0.85rem;">No images uploaded yet.</p>';
         } else {
-          imagesList.innerHTML = mediaLibrary.images.map(image => `
-            <div class="media-item">
+          imagesList.innerHTML = mediaLibrary.images.map((image, index) => {
+            const isDuplicate = imageDuplicates.has(index);
+            return `
+            <div class="media-item ${isDuplicate ? 'duplicate' : ''}">
               <span class="media-name">${image.name}</span>
+              ${isDuplicate ? '<span class="duplicate-badge">DUPLICATE</span>' : ''}
               <span class="media-size">${formatFileSize(image.size)}</span>
             </div>
-          `).join('');
+          `;
+          }).join('');
         }
       }
 

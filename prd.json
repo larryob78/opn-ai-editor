@@ -13,7 +13,7 @@
         "Saved project includes project name and timestamp",
         "Projects are stored as a JSON array in localStorage under 'opn-projects' key"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-002",

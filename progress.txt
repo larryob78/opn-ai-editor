@@ -1,0 +1,15 @@
+## Codebase Patterns
+- Static HTML project: No build system, TypeScript, or test framework
+- All JavaScript is inline in index.html within <script> tags
+- Uses localStorage for client-side persistence
+- OpenAI API key stored in localStorage under 'openai-api-key'
+- CSS is inline in <style> tags within <head>
+- UI follows dark theme with colors #0d1217 (bg), #161d29 (sections), #355070 (buttons)
+
+## Progress Log
+
+### Iteration 0 - Project Setup
+- Created prd.json with 5 user stories for project management features
+- Created progress.txt for tracking
+- Project is a static HTML film editor interface with OpenAI integration
+- Current state: Basic UI with video upload, preview, and AI instruction processing

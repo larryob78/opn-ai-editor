@@ -1,0 +1,71 @@
+{
+  "branchName": "claude/setup-project-init-JtwmO",
+  "projectName": "Opn AI Editor",
+  "description": "A lightweight film-editing user interface with OpenAI integration for natural language editing instructions",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Save projects to localStorage",
+      "description": "As a user, I want my projects to be saved to localStorage so they persist across page refreshes",
+      "priority": 1,
+      "acceptanceCriteria": [
+        "When user clicks Upload button with a project name, the project is saved to localStorage",
+        "Saved project includes project name and timestamp",
+        "Projects are stored as a JSON array in localStorage under 'opn-projects' key"
+      ],
+      "passes": false
+    },
+    {
+      "id": "US-002",
+      "title": "Display saved projects list",
+      "description": "As a user, I want to see my saved projects in the Projects panel so I can access them later",
+      "priority": 2,
+      "acceptanceCriteria": [
+        "Projects panel shows list of saved projects from localStorage",
+        "Each project displays its name and creation date",
+        "Empty state message shown when no projects exist"
+      ],
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Load project on click",
+      "description": "As a user, I want to click on a saved project to load it",
+      "priority": 3,
+      "acceptanceCriteria": [
+        "Clicking on a project name loads that project",
+        "Project name field is populated with selected project's name",
+        "Visual indicator shows which project is currently selected"
+      ],
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Delete saved projects",
+      "description": "As a user, I want to delete saved projects I no longer need",
+      "priority": 4,
+      "acceptanceCriteria": [
+        "Each project in the list has a delete button",
+        "Clicking delete removes the project from localStorage",
+        "Projects list updates immediately after deletion"
+      ],
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Form validation for project creation",
+      "description": "As a user, I want clear feedback when creating projects with missing information",
+      "priority": 5,
+      "acceptanceCriteria": [
+        "Upload button validates project name is not empty",
+        "Error message displayed if project name is missing",
+        "Success message displayed when project is saved"
+      ],
+      "passes": false
+    }
+  ],
+  "qualityChecks": {
+    "htmlValidation": "npx html-validate index.html --config .htmlvalidate.json || true",
+    "notes": "This is a static HTML project without TypeScript or test framework"
+  }
+}

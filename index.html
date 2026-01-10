@@ -177,6 +177,35 @@
         }
       });
 
+      // US-001: Save projects to localStorage
+      const projectNameInput = document.getElementById('project-name');
+      const uploadBtn = document.querySelector('.section button.button');
+
+      uploadBtn.addEventListener('click', function() {
+        const projectName = projectNameInput.value.trim() || 'Untitled Project';
+
+        // Get existing projects from localStorage
+        const existingProjects = JSON.parse(localStorage.getItem('opn-projects') || '[]');
+
+        // Create new project object
+        const newProject = {
+          id: Date.now(),
+          name: projectName,
+          createdAt: new Date().toISOString()
+        };
+
+        // Add to projects array
+        existingProjects.push(newProject);
+
+        // Save back to localStorage
+        localStorage.setItem('opn-projects', JSON.stringify(existingProjects));
+
+        alert('Project "' + projectName + '" saved successfully!');
+
+        // Clear the input
+        projectNameInput.value = '';
+      });
+
                             // OpenAI API Key Management
                             const saveApiKeyBtn = document.getElementById('save-api-key');
                             const apiKeyInput = document.getElementById('openai-key');
